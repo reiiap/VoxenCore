@@ -1,0 +1,12 @@
+name: VoxenCore
+version: ${version}
+main: com.voxencore.core.VoxenCorePlugin
+api-version: '1.21'
+authors: [ReiiAp]
+description: Enterprise framework plugin for survival networks.
+softdepend:
+  - PlaceholderAPI
+  - Vault
+  - LuckPerms
+  - ProtocolLib
+  - packetevents
