@@ -35,3 +35,11 @@ The codebase targets Java 21, uses Java only for production code, and keeps publ
 ## Paper API Dependency Strategy
 
 `voxencore-core` is compiled against a local compile-only Paper bootstrap stub in `voxencore-paper-stub` so the project remains buildable in restricted CI environments where external Maven repositories are blocked. The stub is not packaged into the core plugin artifact and exists only to model the small bootstrap surface needed by the current foundation phase. Production Paper API usage should be added through official Paper API dependencies as subsystem adapters are implemented.
+
+## Phase 2 Core Infrastructure
+
+The second implementation phase adds foundational infrastructure services:
+
+- `voxencore-config` provides asynchronous configuration loading, hot reload, validation, and ordered schema migration.
+- `voxencore-database` provides JDBC abstractions, supported provider factories for SQLite, MySQL, MariaDB, and PostgreSQL, HikariCP runtime integration, repository contracts, entity mapping, migrations, and transaction execution.
+- `voxencore-core` provides logging, metrics, module loading, hook management, and lifecycle management services registered during plugin bootstrap.

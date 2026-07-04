@@ -3,6 +3,14 @@ package com.voxencore.core;
 import com.voxencore.api.event.EventBus;
 import com.voxencore.api.service.ServiceKey;
 import com.voxencore.api.service.ServiceRegistry;
+import com.voxencore.core.hook.HookManager;
+import com.voxencore.core.lifecycle.LifecycleManager;
+import com.voxencore.core.lifecycle.LifecycleStage;
+import com.voxencore.core.logging.JdkVoxenLogger;
+import com.voxencore.core.logging.VoxenLogger;
+import com.voxencore.core.metrics.InMemoryMetricsService;
+import com.voxencore.core.metrics.MetricsService;
+import com.voxencore.core.module.ModuleLoader;
 import com.voxencore.scheduler.DefaultSchedulerManager;
 import com.voxencore.scheduler.SchedulerManager;
 import com.voxencore.thread.DefaultThreadManager;
@@ -14,25 +22,50 @@ public final class VoxenCorePlugin extends JavaPlugin {
   private final DefaultServiceRegistry services = new DefaultServiceRegistry();
   private ThreadManager threadManager;
   private SchedulerManager schedulerManager;
+  private HookManager hookManager;
+  private ModuleLoader moduleLoader;
+  private LifecycleManager lifecycleManager;
 
   @Override
   public void onEnable() {
+    lifecycleManager = new LifecycleManager();
+    lifecycleManager.transitionTo(LifecycleStage.STARTING);
     threadManager = new DefaultThreadManager();
     schedulerManager = new DefaultSchedulerManager();
+    hookManager = new HookManager();
+    moduleLoader = new ModuleLoader(services);
     services.register(ServiceKey.of(ServiceRegistry.class), services);
     services.register(ServiceKey.of(EventBus.class), new SimpleEventBus());
     services.register(ServiceKey.of(ThreadManager.class), threadManager);
     services.register(ServiceKey.of(SchedulerManager.class), schedulerManager);
+    services.register(ServiceKey.of(VoxenLogger.class), new JdkVoxenLogger(getLogger()));
+    services.register(ServiceKey.of(MetricsService.class), new InMemoryMetricsService());
+    services.register(ServiceKey.of(HookManager.class), hookManager);
+    services.register(ServiceKey.of(ModuleLoader.class), moduleLoader);
+    services.register(ServiceKey.of(LifecycleManager.class), lifecycleManager);
+    lifecycleManager.transitionTo(LifecycleStage.RUNNING);
     getLogger().info("VoxenCore framework services are online.");
   }
 
   @Override
   public void onDisable() {
+    if (lifecycleManager != null) {
+      lifecycleManager.transitionTo(LifecycleStage.STOPPING);
+    }
+    if (moduleLoader != null) {
+      moduleLoader.close();
+    }
+    if (hookManager != null) {
+      hookManager.close();
+    }
     if (schedulerManager != null) {
       schedulerManager.close();
     }
     if (threadManager != null) {
       threadManager.close();
+    }
+    if (lifecycleManager != null) {
+      lifecycleManager.transitionTo(LifecycleStage.STOPPED);
     }
     getLogger().info("VoxenCore framework services are offline.");
   }
