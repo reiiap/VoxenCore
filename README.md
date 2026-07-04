@@ -43,3 +43,7 @@ The second implementation phase adds foundational infrastructure services:
 - `voxencore-config` provides asynchronous configuration loading, hot reload, validation, and ordered schema migration.
 - `voxencore-database` provides JDBC abstractions, supported provider factories for SQLite, MySQL, MariaDB, and PostgreSQL, HikariCP runtime integration, repository contracts, entity mapping, migrations, and transaction execution.
 - `voxencore-core` provides logging, metrics, module loading, hook management, and lifecycle management services registered during plugin bootstrap.
+
+## Phase 3 Player Platform
+
+The third implementation phase adds the `voxencore-player` platform with immutable profile DTOs, session management, expiring player cache namespaces, cooldowns, asynchronous repository/service contracts, dirty-session batch saving, disconnect save support, crash-recovery checkpoints, and framework player events.
